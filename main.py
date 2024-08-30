@@ -17,7 +17,14 @@ class Tableau:
         self.reduce()
 
     def pivot(self,p,q): # pivot about (p,q)
-        pass
+        self.Matrix[p]/=self.Matrix[p,q]
+        for row in range(1,self.c+2):
+            if row!=p:
+                self.Matrix[row]-=self.Matrix[p]*self.Matrix[row][q]
+                print(self.Matrix)
+        print("Pivot done brdr")
+        print(self.Matrix)
+
     def find_q(self): #find column in non-basis to swap
         pass
     def find_p(self): #find column to swap with q
@@ -33,7 +40,8 @@ A=np.array([[1,0,1,0,0],
             [1,1,0,0,1]])
 b=np.array([4,6,8])
 print(b.shape)
-unit_cost=np.array([-2,-5,6,7,12])
+unit_cost=np.array([-2,-5,0,0,0])
 tab1=Tableau(A,unit_cost,b)
+tab1.pivot(2,2)
 # if __name__=='__main__':
 #     pass
