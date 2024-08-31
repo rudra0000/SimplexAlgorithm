@@ -8,10 +8,11 @@ class Tableau:
         self.unit_cost = unit_cost
         self.A = A
         self.b = b
-        self.basis_mapping = defaultdict()  # will be initialized in reduce function
+        self.basis_mapping = {} # will be initialized in reduce function
         #This won't work. Storing the identity columns as a map does not give us any idea about their arrangement
         #But we need to know the ordering to undertstand which column to remove from basis while swapping.
         self.c, self.d = A.shape  # c constraints d variables
+        self.basis = {}
         self.Matrix = np.zeros((self.c + 2, self.d + 2))
         self.Matrix[1 : self.c + 1, 1 : self.d + 1] = self.A
         self.Matrix[self.c + 1, 1 : self.d + 1] = unit_cost  # unit cost -> row vector
@@ -31,14 +32,17 @@ class Tableau:
 
     def find_q(self):  # find column in non-basis to swap
         min_ind = 0
-        min_val = 0
+        min_val = -1
         for i in range(1, self.d + 1):
+            if min_val == -1:
+                min_val = self.Matrix[self.c + 1][i]
+                min_ind = i
             if self.Matrix[self.c + 1][i] < min_val and (
-                self.basis_mapping.get(i) == None or self.basis_mapping.get(i) == False
+                self.basis.get(i) == None or self.basis.get(i) == False
             ):
                 min_val = self.Matrix[self.c + 1][i]
                 min_ind = i
-        if min_ind == 0:
+        if min_ind == 0 or min_val >= 0:
             return [False, -1]
         return [True, min_ind]
 
@@ -66,6 +70,7 @@ class Tableau:
         print(V)
 
     def solve(self):
+        count = 0
         while 1:
             q = self.find_q()
             if q[0] == False:
@@ -75,7 +80,16 @@ class Tableau:
             if p[0] == False:
                 print("Unbounded")
                 return
-            self.pivot(p, q)
+            print(p)
+            print(q)
+            self.pivot(p[1], q[1])
+            print("self.basis_mapping:", self.basis_mapping)
+            print("p:", p)
+            r = self.basis_mapping.get(p[1])
+            print(r)
+            self.basis[r] = False
+            self.basis[q[1]] = True
+        self.printMat()
         pass
 
 
@@ -90,9 +104,13 @@ b=np.array([4,6,8])
 print(b.shape)
 unit_cost=np.array([-2,-5,0,0,0])
 tab1=Tableau(A,unit_cost,b)
-tab1.basis_mapping[3] = True
-tab1.basis_mapping[4] = True
-tab1.basis_mapping[5] = True
+tab1.basis_mapping[1] = 3
+tab1.basis_mapping[2] = 4
+tab1.basis_mapping[3] = 5
+tab1.basis[3] = True
+tab1.basis[4] = True
+tab1.basis[5] = True
+tab1.solve()
 # # tab1.pivot(2,2)
 # # tab1.pivot(3,1)
 # print(tab1.find_q())
