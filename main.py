@@ -262,3 +262,22 @@ tab1.solve()
 # unit_cost = np.array([2,3, 0, 0])
 # thetab = Tableau(A=A, b=b, unit_cost=unit_cost)
 # thetab.solve()
+
+
+#AtoZ math.com
+# A=np.array([[3,5,2,1,0,0],
+#             [4,4,4,0,1,0],
+#             [2,4,5,0,0,1]])
+# b=np.array([60,72,100])
+# unit_cost=np.array([-5,-10,-8,0,0,0])
+# newtab=Tableau(A=A,unit_cost=unit_cost,b=b)
+# newtab.solve()
+# newtab.printMat()
+
+A=np.array([[1,0,1,0],
+            [0,1,0,1]])
+unit_cost=np.array([1,-1,0,0])
+b=np.array([1,1])
+newtab=Tableau(unit_cost=unit_cost,A=A,b=b)
+newtab.solve()
+newtab.printMat()
