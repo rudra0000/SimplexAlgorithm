@@ -156,6 +156,7 @@ class Tableau:
 
 
 def transform_to_standard_lp():  # min ,all vars > 0, slack vars
+    #todo
     pass
 
 #test1 yay this works
