@@ -154,7 +154,6 @@ class Tableau:
             self.is_basis[q[1]] = True
             self.basis_ordering[p[1]]=q[1]
 
-
 def transform_to_standard_lp():  # min ,all vars > 0, slack vars
     #todo
     pass

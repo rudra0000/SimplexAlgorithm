@@ -5,4 +5,32 @@ Unbounded Solution: In the simplex method, if in the pivot column all the entrie
 the other condition that needs to be checked is if  c and d= something
 ketan confirmed via an example that the above criteria written for infeaasible solution is correct and needs to be added to our code.
 
-hello, testing commit
+
+
+tasks:
+- conv max to min prob by assuming certain input format and while displaying final result negate values appropriately
+- deal with cases that lead to infeasible solutions 
+    - c > d
+    - ketan's point today (artificial problem doesn't have optimal solution)
+-slack variables may lead to the formation of redundant equations ( as c <= d may occur)
+
+
+
+problem how do we detect that a variable is allowed to be negative for instance -3 <= x1 <= 6
+soln: for each variable treat it as x = u - v
+
+
+problem how to remove reduundant equations after slack variables are introduced 
+solution:
+    write a matrix corressponding to constraints(A|b)
+    reduce the augmented matrx into rref
+    if a row comprises of only zeroes 
+    or it has non-zero values only corresponding to slack variables delete the row( that won't work )
+        why it won't work 
+        2x1+3x2 <= 21
+        2x1+3x2 <= 6
+        if we introduce slack variables then no constraints will get removed as they are no longer redundant
+    so we need to remove redundant constraints at inequality stage itself
+    use O(n^2d) algo suggested by aryan, details not yet clear (about intercepts in n dimensions) -- clear
+    to find all the intercepts 
+
