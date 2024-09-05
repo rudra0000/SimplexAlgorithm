@@ -11,7 +11,7 @@ tasks:
 - conv max to min prob by assuming certain input format and while displaying final result negate values appropriately
 - deal with cases that lead to infeasible solutions 
     - c > d
-    - ketan's point today (artificial problem doesn't have optimal solution)
+    - ketan's point today (artificial problem doesn't have optimal solution) --cost must be 0
 -slack variables may lead to the formation of redundant equations ( as c <= d may occur)
 
 
@@ -20,17 +20,25 @@ problem how do we detect that a variable is allowed to be negative for instance 
 soln: for each variable treat it as x = u - v
 
 
-problem how to remove reduundant equations after slack variables are introduced 
+problem how to remove reduundant equations 
 solution:
     write a matrix corressponding to constraints(A|b)
     reduce the augmented matrx into rref
     if a row comprises of only zeroes 
     or it has non-zero values only corresponding to slack variables delete the row( that won't work )
         why it won't work 
-        2x1+3x2 <= 21
+        4x1+6x2 <= 42
+        2x1 + 3x2 <= 21 ---
         2x1+3x2 <= 6
-        if we introduce slack variables then no constraints will get removed as they are no longer redundant
-    so we need to remove redundant constraints at inequality stage itself
-    use O(n^2d) algo suggested by aryan, details not yet clear (about intercepts in n dimensions) -- clear
-    to find all the intercepts 
+
+
+
+1. max to min and the inequalities
+    a) max to min: make separate lists for less than and greater than
+2. all >= 0 
+-- use aryan's intercept trick to remove redundant eqns
+3. slack
+4. infeasiblility -- the two cases 
+    a) c > d
+    b) no optimal solution for the aritficial problem
 

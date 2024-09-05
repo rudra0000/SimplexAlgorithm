@@ -154,9 +154,17 @@ class Tableau:
             self.is_basis[q[1]] = True
             self.basis_ordering[p[1]]=q[1]
 
-def transform_to_standard_lp():  # min ,all vars > 0, slack vars
+def transform_to_standard_lp(type, d, G, lessthan_list, greaterthan_list, eq_list):  # min ,all vars > 0, slack vars
     #todo
+    #change the objective if needeed based on the type
+    # remove stuff from the greater than list and put it in the less than list
+    # remove all redundant inequations using the O(n^2d) trick 
+    #  now add the slack variables
+
     pass
+
+
+
 
 #test1 yay this works
 # A=np.array([[1,0,1,0,0],
