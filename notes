@@ -1,4 +1,8 @@
 Unbounded Solution: In the simplex method, if in the pivot column all the entries are negative or zero when choosing to leave the variable then the solution is unbounded. 
 2. Infeasible Solution: In the simplex method, if artificial variables are present in the basis, then the solution obtained is infeasible.
 
+
+the other condition that needs to be checked is if  c and d= something
+ketan confirmed via an example that the above criteria written for infeaasible solution is correct and needs to be added to our code.
+
 hello, testing commit

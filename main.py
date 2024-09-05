@@ -160,20 +160,20 @@ def transform_to_standard_lp():  # min ,all vars > 0, slack vars
     pass
 
 #test1 yay this works
-A=np.array([[1,0,1,0,0],
-            [0,1,0,1,0],
-            [1,1,0,0,1]])
-b=np.array([4,6,8])
-# print(b.shape)
-unit_cost=np.array([-2,-5,0,0,0])
-tab1=Tableau(A=A,unit_cost=unit_cost,b=b)
-# tab1.basis_ordering[1] = 3
-# tab1.basis_ordering[2] = 4
-# tab1.basis_ordering[3] = 5
-# tab1.basis[3] = True
-# tab1.basis[4] = True
-# tab1.basis[5] = True
-tab1.solve()
+# A=np.array([[1,0,1,0,0],
+#             [0,1,0,1,0],
+#             [1,1,0,0,1]])
+# b=np.array([4,6,8])
+# # print(b.shape)
+# unit_cost=np.array([-2,-5,0,0,0])
+# tab1=Tableau(A=A,unit_cost=unit_cost,b=b)
+# # tab1.basis_ordering[1] = 3
+# # tab1.basis_ordering[2] = 4
+# # tab1.basis_ordering[3] = 5
+# # tab1.basis[3] = True
+# # tab1.basis[4] = True
+# # tab1.basis[5] = True
+# tab1.solve()
 
 #test2
 # A=np.array([[2,1,1,0],
@@ -275,10 +275,23 @@ tab1.solve()
 # newtab.solve()
 # newtab.printMat()
 
-A=np.array([[1,0,1,0],
-            [0,1,0,1]])
-unit_cost=np.array([1,-1,0,0])
-b=np.array([1,1])
-newtab=Tableau(unit_cost=unit_cost,A=A,b=b)
-newtab.solve()
-newtab.printMat()
+# A=np.array([[1,0,1,0],
+#             [0,1,0,1]])
+# unit_cost=np.array([1,-1,0,0])
+# b=np.array([1,1])
+# newtab=Tableau(unit_cost=unit_cost,A=A,b=b)
+# newtab.solve()
+# newtab.printMat()
+
+
+#test from https://www.uobabylon.edu.iq/eprints/publication_3_29932_132.pdf
+A = np.array([[-1, 1], [0, -2]])
+b = np.array([3, 4])
+unit_cost = np.array([-1, -1])
+
+tabket = Tableau(A=A, b=b, unit_cost=unit_cost)
+print('after init')
+tabket.printMat()
+tabket.solve()
+print('after soling')
+tabket.printMat()
