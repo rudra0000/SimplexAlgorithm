@@ -1,5 +1,20 @@
 import numpy as np
 from collections import defaultdict
+import csv 
+  
+# Open file  
+# with open('inp.csv') as file_obj: 
+      
+#     # Create reader object by passing the file  
+#     # object to reader method 
+#     reader_obj = csv.reader(file_obj) 
+      
+#     # Iterate over each row in the csv  
+#     # file using reader object 
+#     for idx, row in enumerate(reader_obj): 
+#         print(row)
+        
+
 
 
 class Tableau:
@@ -34,8 +49,8 @@ class Tableau:
         min_ind = 0
         min_val = None
         for i in range(1, self.d + 1):
-            print('considering column ', i)
-            print(self.Matrix[self.c+1][i])
+            # print('considering column ', i)
+            # print(self.Matrix[self.c+1][i])
             if min_val is None:
                 min_val = self.Matrix[self.c + 1][i]
                 min_ind = i
@@ -45,36 +60,36 @@ class Tableau:
                 min_val = self.Matrix[self.c + 1][i]
                 min_ind = i
         if min_ind == 0 or min_val >= 0:
-            print('returning false, q not found:')
-            print(f'min_val={min_val} min_ind ={min_ind}')
+            # print('returning false, q not found:')
+            # print(f'min_val={min_val} min_ind ={min_ind}')
             return [False, -1]
         return [True, min_ind]
 
     def find_p(self, q):  # find column to swap with q
         min_ind = 0
         min_val = None
-        print('while finding p self.d is ', self.d)
+        # print('while finding p self.d is ', self.d)
         for i in range(1, self.c + 1):
             if self.Matrix[i][q] > 0:
                 if min_val==None or self.Matrix[i][self.d + 1] / self.Matrix[i][q] < min_val: ########+2
                     min_ind = i
                     min_val = self.Matrix[i][self.d + 1] / self.Matrix[i][q]
-                    print(f'updated min_val {min_val} min_ind {min_ind}')
-                    print(f'divided {self.Matrix[i][self.d+1]} with {self.Matrix[i][q]}')
-        print('min val',min_val)
-        print('min_ind',min_ind)
+                    # print(f'updated min_val {min_val} min_ind {min_ind}')
+                    # print(f'divided {self.Matrix[i][self.d+1]} with {self.Matrix[i][q]}')
+        # print('min val',min_val)
+        # print('min_ind',min_ind)
         if min_ind == 0:
             return [False, -1]
         return [True, min_ind]
 
     def find_initial_bfs(self):  # find an initial bfs for the problem, //artifical problem
         artificial_A=self.A
-        Ic=np.identity(A.shape[0])
-        print('art shape: ',  artificial_A.shape)
-        print('bshape', b.shape)
-        btmp = b
-        print('b.shape is', b.shape)
-        btmp = np.reshape(btmp, (b.shape[0],1))
+        Ic=np.identity(self.A.shape[0])
+        # print('art shape: ',  artificial_A.shape)
+        # print('bshape', self.b.shape)
+        btmp = self.b
+        # print('b.shape is', self.b.shape)
+        btmp = np.reshape(btmp, (self.b.shape[0],1))
         
         artificial_A=np.hstack((artificial_A,Ic,btmp)) #make sure 1 based indexing is followed
         lower_row=np.hstack((np.zeros(self.d),np.ones(self.c),np.zeros(1)))
@@ -92,27 +107,31 @@ class Tableau:
         self.c=self.c
         self.original_matrix=self.artificialMatrix #wastage of space
         self.Matrix=self.artificialMatrix
-        print('self.c', self.c)
-        print('self.d', self.d)
+        # print('self.c', self.c)
+        # print('self.d', self.d)
         self.printMat()
 
         self.solve()
         print('Initial bfs found brdr')
         self.printMat()
         print(self.basis_ordering)
+        if abs(self.Matrix[-1][-1]) > 1e-10:
+            print('INFEASIBLE')
+            exit(0)
         self.ready_to_solve()
         
 
     def ready_to_solve(self): #retrieve the original matrix from the artificial one
-        print("ye lo sizes")
-        print(self.Matrix[0:,:self.original_d+2].shape)
-        print(self.Matrix[:,self.d+1:self.d+2].shape) 
+        print('artificial problem solved--------------------------###################')
+        # print("ye lo sizes")
+        # print(self.Matrix[0:,:self.original_d+2].shape)
+        # print(self.Matrix[:,self.d+1:self.d+2].shape) 
         tmp=np.hstack((self.Matrix[0:,:self.original_d+1],self.Matrix[:,self.d+1:self.d+2]))
-        self.printMat(tmp)
+        # self.printMat(tmp)
         self.Matrix=tmp
-        self.Matrix[-1,1:-1]=unit_cost
+        self.Matrix[-1,1:-1]=self.unit_cost
         self.Matrix[-1,-1]=0
-        self.printMat(self.Matrix)
+        # self.printMat(self.Matrix)
         for key,val in self.basis_ordering.items():
            print('key, val is -------------', key, val)
            last=self.Matrix[-1,val]
@@ -120,7 +139,7 @@ class Tableau:
         print('bhai party dede')
         self.c=self.original_c
         self.d=self.original_d
-        self.printMat()
+        # self.printMat()
 
 
     def printMat(self, matr=None):
@@ -139,11 +158,14 @@ class Tableau:
             q = self.find_q()
             if q[0] == False:
                 print("Optimum")
+                self.printMat()
                 return
             p = self.find_p(q[1])
             if p[0] == False:
+                print(p, q)
+                self.printMat()
                 print("Unbounded")
-                return
+                exit(0)
             print('p is',p)
             print('q is',q)
             self.pivot(p[1], q[1])
@@ -153,15 +175,70 @@ class Tableau:
             self.is_basis[leaving_column] = False
             self.is_basis[q[1]] = True
             self.basis_ordering[p[1]]=q[1]
+    
+    def displayans(self, slack_start):
+        final_ans = []
+        answer = [0]*(self.d+1)
+        for key, value in self.basis_ordering.items():
+            answer[value] = self.Matrix[key][-1]
+        for i in range(1, slack_start, 2):
+            print(f'variable {(i+1)//2} is ', answer[i]-answer[i+1])
+            final_ans.append(answer[i]- answer[i+1])
+        return final_ans
 
-def transform_to_standard_lp(type, d, G, lessthan_list, greaterthan_list, eq_list):  # min ,all vars > 0, slack vars
+
+def transform_to_standard_lp(type, d, lessthan_list, greaterthan_list, eq_list, unit_cost):  # min ,all vars > 0, slack vars
     #todo
+    
     #change the objective if needeed based on the type
-    # remove stuff from the greater than list and put it in the less than list
-    # remove all redundant inequations using the O(n^2d) trick 
-    #  now add the slack variables
+    if type=="MAX":
+        unit_cost=[-x for x in unit_cost]
 
-    pass
+    # remove stuff from the greater than list and put it in the less than list
+    for eqn in greaterthan_list:
+        eqn=[-elem for elem in eqn]
+        lessthan_list.append(eqn)
+    # remove all redundant inequations using the O(n^2d) trick 
+
+    
+    # replace each variable by u - v
+    #change the rows of A
+    # for i in range(0, len(lessthan_list)):
+    #     list  = lessthan_list[i]
+    #     last_el = list[-1]
+    #     list = list[:-1]
+    #     neglist = [-1*x for x in list]
+    #     interleaved = [x for pair in zip(list, neglist) for x in pair]
+    #     lessthan_list[i] = interleaved
+    #     lessthan_list[i].append(last_el) 
+    
+    # #change unit costs
+    # negunit_cost = [-1*x for x in unit_cost]
+    # interleaved = [x for pair in zip(unit_cost, negunit_cost) for x in pair]
+    # unit_cost = interleaved
+
+    #  now add the slack variables
+    sz=len(lessthan_list)
+    slack_start = 2*d+1
+    for index,value in enumerate(lessthan_list): #adding slack variables to less than lists
+        to_add=[0]*len(lessthan_list)
+        to_add[index]=1
+        lessthan_list[index]=lessthan_list[index][:-1]+to_add+lessthan_list[index][-1:]
+    for element in eq_list:  #put all the equations in single list
+        element+=[0]*sz
+        element=element[:-1]+[0]*sz+element[-1:]
+        lessthan_list.append(element)
+    
+    eq_list=lessthan_list #all equations 
+    print(sz)
+    print('less than list[0] is', lessthan_list[0])
+    print('lenght of ith row of less than list is:', len(lessthan_list[0]))
+    print(unit_cost)
+    unit_cost+=[0]*sz
+    A=np.array([row[:-1] for row in eq_list])
+    b=np.array([row[-1] for row in eq_list])
+    unit_cost=np.array(unit_cost)
+    return A,b,unit_cost,slack_start
 
 
 
@@ -292,13 +369,54 @@ def transform_to_standard_lp(type, d, G, lessthan_list, greaterthan_list, eq_lis
 
 
 #test from https://www.uobabylon.edu.iq/eprints/publication_3_29932_132.pdf
-A = np.array([[-1, 1], [0, -2]])
-b = np.array([3, 4])
-unit_cost = np.array([-1, -1])
+# A = np.array([
+#                 [1, 1, 1, 0, 0, 0, 0]
+#               , [1, 1, 0, 1, 0, 0, 0]
+#               , [1, 1, 0, 0, 1, 0, 0]
+#               , [4, 2, 0, 0, 0, 1, 0]
+#               , [2, 4, 0, 0, 0, 0, 1]
+#               ]
+#               )
+# b = np.array([5, 6, 7, 8, 8])
+# unit_cost = np.array([-6, -5, 0, 0, 0, 0, 0])
 
-tabket = Tableau(A=A, b=b, unit_cost=unit_cost)
-print('after init')
-tabket.printMat()
-tabket.solve()
-print('after soling')
-tabket.printMat()
+# tabket = Tableau(A=A, b=b, unit_cost=unit_cost)
+# print('after init')
+# tabket.printMat()
+# tabket.solve()
+# print('after soling')
+# tabket.printMat()
+# print('adfsa adf4r3 dwkfjdsfj')
+# print(tabket.basis_ordering)
+
+# A = np.array([
+#                 [4, 2, 1, 0]
+#               , [2, 4, 0, 1]
+#               ]
+#             )
+# b = np.array([8, 8])
+# unit_cost = np.array([-6, -5, 0, 0])
+# # tabket = Tableau(A=A, b=b, unit_cost=unit_cost)
+# # print('after init')
+# # tabket.printMat()
+# # tabket.solve()
+# # print('after soling')
+# # tabket.printMat()
+# A,b,unit_cost,slack_start=transform_to_standard_lp('MIN',2, [[1,1,6],[1,1,7],[4,2,8],[2,4,8]],[[-1,-1,-5]],[],[-6,-5])
+A, b, unit_cost, slack_start = transform_to_standard_lp('MAX', 3, [[2, 1, 3, 10], [3, 4, 2, 12], [1, 2, 4, 8]], [[-1, -2, -3, -5]], [], [-8, -6, -7])
+# print(A)
+# print(b)
+# print(unit_cost)
+cool_tab=Tableau(A=A,unit_cost=unit_cost,b=b)
+cool_tab.solve()
+cool_tab.printMat()
+print(cool_tab.basis_ordering)
+
+print('###############################################$$')
+cool_tab.displayans(slack_start=slack_start)
+
+
+
+
+
+# print('###############################################$$')

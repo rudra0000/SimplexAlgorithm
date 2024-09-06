@@ -42,3 +42,13 @@ solution:
     a) c > d
     b) no optimal solution for the aritficial problem
 
+
+**for a maximization problem, the bottom right corner of the matrix is the actual maximized cost
+**for a minimization problem, the bottom right corner of the matrix is the negative of the minimized cost
+// so while reporting the final answer take care....
+
+
+do infeasiblility exit from code when it occurs
+
+
+floating point errors, 7.7777777777777777777776 - 7.777777777777777775 = 1e-16 or something like that, but it should be approximated to 0
