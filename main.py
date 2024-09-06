@@ -203,7 +203,7 @@ def transform_to_standard_lp(type, d, lessthan_list, greaterthan_list, eq_list, 
 
     
     # replace each variable by u - v
-    #change the rows of A
+    # change the rows of A
     for i in range(0, len(lessthan_list)):
         list  = lessthan_list[i]
         last_el = list[-1]
@@ -390,21 +390,21 @@ tabket.printMat()
 print('adfsa adf4r3 dwkfjdsfj')
 print(tabket.basis_ordering)
 
-# A = np.array([
-#                 [4, 2, 1, 0]
-#               , [2, 4, 0, 1]
-#               ]
-#             )
-# b = np.array([8, 8])
-# unit_cost = np.array([-6, -5, 0, 0])
-# # tabket = Tableau(A=A, b=b, unit_cost=unit_cost)
-# # print('after init')
-# # tabket.printMat()
-# # tabket.solve()
-# # print('after soling')
-# # tabket.printMat()
-# A,b,unit_cost,slack_start=transform_to_standard_lp('MIN',2, [[1,1,6],[1,1,7],[4,2,8],[2,4,8]],[[-1,-1,-5]],[],[-6,-5])
-A, b, unit_cost, slack_start = transform_to_standard_lp('MAX', 3, [[2, 1, 3, 10], [3, 4, 2, 12], [1, 2, 4, 8]], [[-1, -2, -3, -5]], [], [-8, -6, -7])
+A = np.array([
+                [4, 2, 1, 0]
+              , [2, 4, 0, 1]
+              ]
+            )
+b = np.array([8, 8])
+unit_cost = np.array([-6, -5, 0, 0])
+tabket = Tableau(A=A, b=b, unit_cost=unit_cost)
+print('after init')
+tabket.printMat()
+tabket.solve()
+print('after soling')
+tabket.printMat()
+A,b,unit_cost,slack_start=transform_to_standard_lp('MIN',2, [[1,1,6],[1,1,7],[4,2,8],[2,4,8]],[[-1,-1,-5]],[],[-6,-5])
+# A, b, unit_cost, slack_start = transform_to_standard_lp('MAX', 3, [[2, 1, 3, 10], [3, 4, 2, 12], [1, 2, 4, 8]], [[-1, -2, -3, -5]], [], [-8, -6, -7])
 print(A)
 print(b)
 print(unit_cost)
@@ -413,7 +413,7 @@ cool_tab.solve()
 cool_tab.printMat()
 print(cool_tab.basis_ordering)
 
-print('###############################################$$')
+# print('###############################################$$')
 cool_tab.displayans(slack_start=slack_start)
 
-print('###############################################$$')
+# print('###############################################$$')
