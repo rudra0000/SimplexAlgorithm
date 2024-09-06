@@ -35,12 +35,15 @@ class Tableau:
         self.Matrix[self.c + 1, self.d + 1] = 0
         # print(self.Matrix)
         self.find_initial_bfs()
+        # self.Matrix[-1][-1] = -34
 
     def pivot(self, p, q):  # pivot about (p,q)
+        EPSILON = 1e-9  # Tolerance for small values
         self.Matrix[p] /= self.Matrix[p, q]
         for row in range(1, self.c + 2):
             if row != p:
                 self.Matrix[row] -= self.Matrix[p] * self.Matrix[row][q]
+                self.Matrix[row][abs(self.Matrix[row]) < EPSILON] = 0
                 # print(self.Matrix)
         print("Pivot done brdr")
         self.printMat()
@@ -176,15 +179,18 @@ class Tableau:
             self.is_basis[leaving_column] = False
             self.is_basis[q[1]] = True
             self.basis_ordering[p[1]]=q[1]
+            # self.Matrix = np.round(self.Matrix, 1)
     
     def displayans(self, slack_start):
         final_ans = []
         answer = [0]*(self.d+1)
         for key, value in self.basis_ordering.items():
             answer[value] = self.Matrix[key][-1]
+        print('The final answer is:', answer)
+        print(slack_start)
         for i in range(1, slack_start, 2):
             print(f'variable {(i+1)//2} is ', answer[i]-answer[i+1])
-            final_ans.append(answer[i]- answer[i+1])
+            final_ans.append(answer[i]-answer[i+1])
         return final_ans
 
 
@@ -220,7 +226,7 @@ def transform_to_standard_lp(type, d, lessthan_list, greaterthan_list, eq_list, 
 
     #  now add the slack variables
     sz=len(lessthan_list)
-    slack_start = d+1
+    slack_start = 2*d+1
     for index,value in enumerate(lessthan_list): #adding slack variables to less than lists
         to_add=[0]*len(lessthan_list)
         to_add[index]=1
@@ -370,39 +376,39 @@ def transform_to_standard_lp(type, d, lessthan_list, greaterthan_list, eq_list, 
 
 
 #test from https://www.uobabylon.edu.iq/eprints/publication_3_29932_132.pdf
-A = np.array([
-                [1, 1, 1, 0, 0, 0, 0]
-              , [1, 1, 0, 1, 0, 0, 0]
-              , [1, 1, 0, 0, 1, 0, 0]
-              , [4, 2, 0, 0, 0, 1, 0]
-              , [2, 4, 0, 0, 0, 0, 1]
-              ]
-              )
-b = np.array([5, 6, 7, 8, 8])
-unit_cost = np.array([-6, -5, 0, 0, 0, 0, 0])
+# A = np.array([
+#                 [1, -1, 1, -1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0]
+#               , [1, -1, 1, -1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0]
+#               , [4, -4, 2, -2, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0]
+#               , [2, -2, 4, -4, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0]
+#               , [1, -1, 1, -1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+#               ]
+#               )
+# b = np.array([6, 7, 8, 8, 5])
+# unit_cost = np.array([0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1])
 
-tabket = Tableau(A=A, b=b, unit_cost=unit_cost)
-print('after init')
-tabket.printMat()
-tabket.solve()
-print('after soling')
-tabket.printMat()
-print('adfsa adf4r3 dwkfjdsfj')
-print(tabket.basis_ordering)
+# tabket = Tableau(A=A, b=b, unit_cost=unit_cost)
+# print('after init')
+# tabket.printMat()
+# tabket.solve()
+# print('after soling')
+# tabket.printMat()
+# print('adfsa adf4r3 dwkfjdsfj')
+# print(tabket.basis_ordering)
 
-A = np.array([
-                [4, 2, 1, 0]
-              , [2, 4, 0, 1]
-              ]
-            )
-b = np.array([8, 8])
-unit_cost = np.array([-6, -5, 0, 0])
-tabket = Tableau(A=A, b=b, unit_cost=unit_cost)
-print('after init')
-tabket.printMat()
-tabket.solve()
-print('after soling')
-tabket.printMat()
+# A = np.array([
+#                 [4, 2, 1, 0]
+#               , [2, 4, 0, 1]
+#               ]
+#             )
+# b = np.array([8, 8])
+# unit_cost = np.array([-6, -5, 0, 0])
+# tabket = Tableau(A=A, b=b, unit_cost=unit_cost)
+# print('after init')
+# tabket.printMat()
+# tabket.solve()
+# print('after soling')
+# tabket.printMat()
 A,b,unit_cost,slack_start=transform_to_standard_lp('MIN',2, [[1,1,6],[1,1,7],[4,2,8],[2,4,8]],[[-1,-1,-5]],[],[-6,-5])
 # A, b, unit_cost, slack_start = transform_to_standard_lp('MAX', 3, [[2, 1, 3, 10], [3, 4, 2, 12], [1, 2, 4, 8]], [[-1, -2, -3, -5]], [], [-8, -6, -7])
 print(A)
@@ -413,7 +419,7 @@ cool_tab.solve()
 cool_tab.printMat()
 print(cool_tab.basis_ordering)
 
-# print('###############################################$$')
+print('###############################################$$')
 cool_tab.displayans(slack_start=slack_start)
 
-# print('###############################################$$')
+print('###############################################$$')
