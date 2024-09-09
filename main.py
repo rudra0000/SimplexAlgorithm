@@ -238,8 +238,6 @@ def transform_to_standard_lp(type, d, lessthan_list, greaterthan_list, eq_list, 
         to_add=[0]*len(lessthan_list)
         to_add[index]=1
         lessthan_list[index]=lessthan_list[index][:-1]+to_add+lessthan_list[index][-1:]
-        print(f'here by human clay magic {eq_list}')
-
     
     print(f'b4 u-v eq_list is', eq_list)
     for i in range(0, len(eq_list)):
@@ -254,17 +252,36 @@ def transform_to_standard_lp(type, d, lessthan_list, greaterthan_list, eq_list, 
     print(f'after u-v eq_list is', eq_list)
     
     print(len(lessthan_list[0]) - len(eq_list[0]), '0s added manually')
-    eq_list += [0] * (len(lessthan_list[0]) - len(eq_list[0]))
+    
+    # if(len(lessthan_list) != 0):
+
+    print('that loser idff is', len(lessthan_list[0]) - len(eq_list[0]))
+
+    print('dark disaster')
+    print(len(eq_list))
+    print(len(lessthan_list[0]))
+    for i in range(len(eq_list)):
+        tmp_list = eq_list[i][:-1] + [0] * (len(lessthan_list[i]) - len(eq_list[i])) + [eq_list[i][-1]]
+        eq_list[i] = tmp_list
+        print(eq_list[i])
+    
+
     print(f'kombucha {eq_list}')
 
-    
-    eq_list=lessthan_list #all equations 
+    print('listen up :')
+    print(eq_list)
+    print(lessthan_list)
+    for list1 in lessthan_list:
+        eq_list.append(list1)
     print(sz)
     print('less than list[0] is', lessthan_list[0])
     print('lenght of ith row of less than list is:', len(lessthan_list[0]))
     print(unit_cost)
     unit_cost+=[0]*sz
     print(f'eq_list {eq_list}')
+    print('chocholate starfish')
+    for row in eq_list:
+        print(row[:-1])
     A=np.array([row[:-1] for row in eq_list])
     b=np.array([row[-1] for row in eq_list])
     unit_cost=np.array(unit_cost)
