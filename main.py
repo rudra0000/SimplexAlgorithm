@@ -3,16 +3,17 @@ from collections import defaultdict
 import csv 
   
 # Open file  
-# with open('inp.csv') as file_obj: 
+with open('inp.csv') as file_obj: 
       
-#     # Create reader object by passing the file  
-#     # object to reader method 
-#     reader_obj = csv.reader(file_obj) 
+    # Create reader object by passing the file  
+    # object to reader method 
+    reader_obj = csv.reader(file_obj) 
+    reader_obj=list(reader_obj)
       
-#     # Iterate over each row in the csv  
-#     # file using reader object 
-#     for idx, row in enumerate(reader_obj): 
-#         print(row)
+    # Iterate over each row in the csv  
+    # file using reader object 
+    # for idx, row in enumerate(reader_obj): 
+    #     print(row)
         
 
 
@@ -38,7 +39,7 @@ class Tableau:
         # self.Matrix[-1][-1] = -34
 
     def pivot(self, p, q):  # pivot about (p,q)
-        EPSILON = 1e-9  # Tolerance for small values
+        EPSILON = 1e-8  # Tolerance for small values
         self.Matrix[p] /= self.Matrix[p, q]
         for row in range(1, self.c + 2):
             if row != p:
@@ -187,6 +188,7 @@ class Tableau:
         for key, value in self.basis_ordering.items():
             answer[value] = self.Matrix[key][-1]
         print('The final answer is:', answer)
+        print(f'self.basis rows {self.basis_ordering}')
         print(slack_start)
         for i in range(1, slack_start, 2):
             print(f'variable {(i+1)//2} is ', answer[i]-answer[i+1])
@@ -196,8 +198,11 @@ class Tableau:
 
 def transform_to_standard_lp(type, d, lessthan_list, greaterthan_list, eq_list, unit_cost):  # min ,all vars > 0, slack vars
     #todo
-    
+    print('at the start', eq_list)
     #change the objective if needeed based on the type
+    eq_list  = eq_list[:]
+    lessthan_list = lessthan_list[:]
+    greaterthan_list = greaterthan_list[:]
     if type=="MAX":
         unit_cost=[-x for x in unit_cost]
 
@@ -218,12 +223,14 @@ def transform_to_standard_lp(type, d, lessthan_list, greaterthan_list, eq_list, 
         interleaved = [x for pair in zip(list, neglist) for x in pair]
         lessthan_list[i] = interleaved
         lessthan_list[i].append(last_el) 
-    
+    #u-v for lesshthanlist added
+
     #change unit costs
     negunit_cost = [-1*x for x in unit_cost]
     interleaved = [x for pair in zip(unit_cost, negunit_cost) for x in pair]
     unit_cost = interleaved
-
+    #added u-v for unit cost
+    print(f'here by magic {eq_list}')
     #  now add the slack variables
     sz=len(lessthan_list)
     slack_start = 2*d+1
@@ -231,10 +238,25 @@ def transform_to_standard_lp(type, d, lessthan_list, greaterthan_list, eq_list, 
         to_add=[0]*len(lessthan_list)
         to_add[index]=1
         lessthan_list[index]=lessthan_list[index][:-1]+to_add+lessthan_list[index][-1:]
-    for element in eq_list:  #put all the equations in single list
-        element+=[0]*sz
-        element=element[:-1]+[0]*sz+element[-1:]
-        lessthan_list.append(element)
+        print(f'here by human clay magic {eq_list}')
+
+    
+    print(f'b4 u-v eq_list is', eq_list)
+    for i in range(0, len(eq_list)):
+        list  = eq_list[i]
+        last_el = list[-1]
+        list = list[:-1]
+        neglist = [-1*x for x in list]
+        interleaved = [x for pair in zip(list, neglist) for x in pair]
+        eq_list[i] = interleaved
+        eq_list[i].append(last_el) 
+    #u-v fo requal list
+    print(f'after u-v eq_list is', eq_list)
+    
+    print(len(lessthan_list[0]) - len(eq_list[0]), '0s added manually')
+    eq_list += [0] * (len(lessthan_list[0]) - len(eq_list[0]))
+    print(f'kombucha {eq_list}')
+
     
     eq_list=lessthan_list #all equations 
     print(sz)
@@ -242,10 +264,103 @@ def transform_to_standard_lp(type, d, lessthan_list, greaterthan_list, eq_list, 
     print('lenght of ith row of less than list is:', len(lessthan_list[0]))
     print(unit_cost)
     unit_cost+=[0]*sz
+    print(f'eq_list {eq_list}')
     A=np.array([row[:-1] for row in eq_list])
     b=np.array([row[-1] for row in eq_list])
     unit_cost=np.array(unit_cost)
     return A,b,unit_cost,slack_start
+
+
+    
+#function to take input for a single test case
+#will be called multiple times inside while loop
+def take_input_of_one_test_case(test_case,equal_list,greater_than_list,less_than_list):
+    #read the first two lists
+    first_list=test_case[0]
+    second_list=test_case[1]
+    type=first_list[0]
+    number_of_actual_variables=int(first_list[1])
+
+    #auxillary function to parse a single row
+    def parse_input_row(row):
+        idx=0
+        print(f'row {row}')
+        v=[0]*number_of_actual_variables
+        while idx<len(row):
+            # print(row[idx])
+            splitted=row[idx].split('@') #splitted is a list
+            if len(splitted)>1:
+                x,j=int(splitted[0]),int(splitted[1])
+                if j<=idx:
+                    print(f'j {j} idx {idx}')
+                    print("Error while parsing")
+                    exit(0)
+                else: 
+                    idx=j
+                v[idx-1]=x
+            else:
+                idx+=1
+                v[idx-1]=int(splitted[0])
+        return v #returns a list
+    
+    unit_cost=parse_input_row(second_list)
+    curr_row=2
+    while curr_row<len(test_case):
+        print(f'test_case[curr_row][1] {test_case[curr_row][1]}')
+        last_element=int(test_case[curr_row][0])
+        parsed_row=parse_input_row(test_case[curr_row][2:])
+        parsed_row.append(last_element)
+        print(f'parsedd row {parsed_row}') #thik hai bhai
+        if test_case[curr_row][1]=='=':
+           print(f'parsed row {parsed_row} went to equal list')
+           equal_list.append(parsed_row) 
+        elif test_case[curr_row][1]=='>=':
+            print(f'parsed row {parsed_row} went to great list')
+            greater_than_list.append(parsed_row)
+        else:
+            print(f'parsed row {parsed_row} went to less list')
+            less_than_list.append(parsed_row)
+        curr_row+=1
+    
+    print(f'type {type}')
+    print(f'd {number_of_actual_variables}')
+    print(f'lessthan_list {less_than_list}')
+    print(f'greaterthan_list {greater_than_list}')
+    print(f'eq_list {equal_list}')
+    print(f'unit_cost {unit_cost}')
+    return type,number_of_actual_variables, less_than_list, greater_than_list, equal_list, unit_cost
+
+def take_input(reader_obj):
+    current_index=0
+    while current_index<len(reader_obj):
+        print(f'current index {current_index}')
+        equal_list=[]
+        greater_than_list=[]
+        less_than_list=[]
+        start=current_index
+        current_index+=1
+        while current_index<len(reader_obj) and 'M' not in reader_obj[current_index][0]:
+            current_index+=1
+        end=current_index
+        print(reader_obj)
+        type,number_of_actual_variables, less_than_list, greater_than_list, equal_list, unit_cost=take_input_of_one_test_case(reader_obj[start:end],equal_list,greater_than_list,less_than_list)
+        print("we will do this correctly")
+        A,b,unit_cost,slack_start=transform_to_standard_lp(type,number_of_actual_variables,less_than_list,greater_than_list,equal_list,unit_cost)
+        print("md salah")
+        tableau=Tableau(A=A,b=b,unit_cost=unit_cost)
+        tableau.solve()
+        tableau.printMat()
+        tableau.displayans(slack_start)
+        print("Input taken successfully")
+        print(f'current index sar {current_index}')
+
+    
+
+
+print(reader_obj)
+take_input(reader_obj=reader_obj)
+
+    
 
 
 
@@ -409,17 +524,17 @@ def transform_to_standard_lp(type, d, lessthan_list, greaterthan_list, eq_list, 
 # tabket.solve()
 # print('after soling')
 # tabket.printMat()
-A,b,unit_cost,slack_start=transform_to_standard_lp('MIN',2, [[1,1,6],[1,1,7],[4,2,8],[2,4,8]],[[-1,-1,-5]],[],[-6,-5])
-# A, b, unit_cost, slack_start = transform_to_standard_lp('MAX', 3, [[2, 1, 3, 10], [3, 4, 2, 12], [1, 2, 4, 8]], [[-1, -2, -3, -5]], [], [-8, -6, -7])
-print(A)
-print(b)
-print(unit_cost)
-cool_tab=Tableau(A=A,unit_cost=unit_cost,b=b)
-cool_tab.solve()
-cool_tab.printMat()
-print(cool_tab.basis_ordering)
+# A,b,unit_cost,slack_start=transform_to_standard_lp('MIN',2, [[1,1,6],[1,1,7],[4,2,8],[2,4,8]],[[-1,-1,-5]],[],[-6,-5])
+# # A, b, unit_cost, slack_start = transform_to_standard_lp('MAX', 3, [[2, 1, 3, 10], [3, 4, 2, 12], [1, 2, 4, 8]], [[-1, -2, -3, -5]], [], [-8, -6, -7])
+# print(A)
+# print(b)
+# print(unit_cost)
+# cool_tab=Tableau(A=A,unit_cost=unit_cost,b=b)
+# cool_tab.solve()
+# cool_tab.printMat()
+# print(cool_tab.basis_ordering)
 
-print('###############################################$$')
-cool_tab.displayans(slack_start=slack_start)
+# print('###############################################$$')
+# cool_tab.displayans(slack_start=slack_start)
 
-print('###############################################$$')
+# print('###############################################$$')

@@ -52,3 +52,16 @@ do infeasiblility exit from code when it occurs
 
 
 floating point errors, 7.7777777777777777777776 - 7.777777777777777775 = 1e-16 or something like that, but it should be approximated to 0
+
+
+A, b, unit_cost, slack_start = transform_to_standard_lp('MAX', 3, [[2, 1, 3, 10], [3, 4, 2, 12], [1, 2, 4, 8]], [[-1, -2, -3, -5]], [], [-8, -6, -7])
+cool_tab=Tableau(A=A,unit_cost=unit_cost,b=b)
+cool_tab.solve()
+cool_tab.printMat()
+print(cool_tab.basis_ordering)
+
+print('###############################################$$')
+cool_tab.displayans(slack_start=slack_start)
+
+
+ketan changed the criteria for infeasibility and saved us
