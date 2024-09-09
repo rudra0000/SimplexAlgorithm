@@ -1,6 +1,6 @@
 import numpy as np
 from collections import defaultdict
-import csv 
+import csv,math
   
 # Open file  
 with open('inp.csv') as file_obj: 
@@ -199,6 +199,22 @@ class Tableau:
 def transform_to_standard_lp(type, d, lessthan_list, greaterthan_list, eq_list, unit_cost):  # min ,all vars > 0, slack vars
     #todo
     print('at the start', eq_list)
+    #removing redundancies in the equals list
+    equality_set=set()
+    for eqn in eq_list:
+        gcd=0
+        for elem in eqn:
+            gcd=math.gcd(elem,gcd)
+        for elem in eqn:
+            elem/=gcd
+        print(f'eqn is {eqn}')
+        equality_set.add(tuple(eqn))
+        
+    eq_list=[[x for x in tup] for tup in equality_set]
+    print("eq_list after removing redundancies is ", eq_list)
+    if len(eq_list)>d:
+        print("Overconstrained ,infeasible")
+        exit(0)
     #change the objective if needeed based on the type
     eq_list  = eq_list[:]
     lessthan_list = lessthan_list[:]
@@ -241,21 +257,21 @@ def transform_to_standard_lp(type, d, lessthan_list, greaterthan_list, eq_list, 
     
     print(f'b4 u-v eq_list is', eq_list)
     for i in range(0, len(eq_list)):
-        list  = eq_list[i]
-        last_el = list[-1]
-        list = list[:-1]
-        neglist = [-1*x for x in list]
-        interleaved = [x for pair in zip(list, neglist) for x in pair]
+        list1  = eq_list[i]
+        last_el = list1[-1]
+        list1 = list1[:-1]
+        neglist = [-1*x for x in list1]
+        interleaved = [x for pair in zip(list1, neglist) for x in pair]
         eq_list[i] = interleaved
         eq_list[i].append(last_el) 
     #u-v fo requal list
     print(f'after u-v eq_list is', eq_list)
     
-    print(len(lessthan_list[0]) - len(eq_list[0]), '0s added manually')
+    # print(len(lessthan_list[0]) - len(eq_list[0]), '0s added manually')
     
     # if(len(lessthan_list) != 0):
 
-    print('that loser idff is', len(lessthan_list[0]) - len(eq_list[0]))
+    # print('that loser idff is', len(lessthan_list[0]) - len(eq_list[0]))
 
     print('dark disaster')
     print(len(eq_list))
