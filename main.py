@@ -195,22 +195,43 @@ class Tableau:
             final_ans.append(answer[i]-answer[i+1])
         return final_ans
 
+def remove_redundant_equalities_rref(eq_list):
+    cpy=eq_list[:]
+    def pivot(row,col):
+        eq_list[row]=[x/eq_list[row][col] for x in eq_list[row]]
+        for r in range(0,len(eq_list)):
+            if r!=row:
+                eq_list[r]=[x-y*eq_list[r][col] for x,y in zip(eq_list[r],eq_list[row])]
+    
+    is_available={i:True for i in range(0,len(eq_list))}
+    for col in range(len(eq_list[0])):
+        #loop to find the first non zero row
+        for row in range(len(eq_list)):
+            if is_available[row] and eq_list[row][col]!=0:
+                pivot(row,col)
+                is_available[row]=False
+    filtered_list = [lst2 for lst, lst2 in zip(eq_list,cpy) if any(lst)]
+    print(f'filtered_list {filtered_list}')
+    return filtered_list
+
+
 
 def transform_to_standard_lp(type, d, lessthan_list, greaterthan_list, eq_list, unit_cost):  # min ,all vars > 0, slack vars
     #todo
     print('at the start', eq_list)
     #removing redundancies in the equals list
-    equality_set=set()
-    for eqn in eq_list:
-        gcd=0
-        for elem in eqn:
-            gcd=math.gcd(elem,gcd)
-        for elem in eqn:
-            elem/=gcd
-        print(f'eqn is {eqn}')
-        equality_set.add(tuple(eqn))
+    # equality_set=set() #not doing as of now 
+    # for eqn in eq_list:
+    #     gcd=0
+    #     for elem in eqn:
+    #         gcd=math.gcd(elem,gcd)
+    #     for elem in eqn:
+    #         elem/=gcd
+    #     print(f'eqn is {eqn}')
+    #     equality_set.add(tuple(eqn))
         
-    eq_list=[[x for x in tup] for tup in equality_set]
+    # eq_list=[[x for x in tup] for tup in equality_set]
+    eq_list=remove_redundant_equalities_rref(eq_list)
     print("eq_list after removing redundancies is ", eq_list)
     if len(eq_list)>d:
         print("Overconstrained ,infeasible")
@@ -275,9 +296,11 @@ def transform_to_standard_lp(type, d, lessthan_list, greaterthan_list, eq_list, 
 
     print('dark disaster')
     print(len(eq_list))
-    print(len(lessthan_list[0]))
+    # print(len(lessthan_list[0]))
     for i in range(len(eq_list)):
-        tmp_list = eq_list[i][:-1] + [0] * (len(lessthan_list[i]) - len(eq_list[i])) + [eq_list[i][-1]]
+        if len(lessthan_list) == 0:
+            break
+        tmp_list = eq_list[i][:-1] + [0] * (len(lessthan_list[0]) - len(eq_list[i])) + [eq_list[i][-1]]
         eq_list[i] = tmp_list
         print(eq_list[i])
     
@@ -290,8 +313,6 @@ def transform_to_standard_lp(type, d, lessthan_list, greaterthan_list, eq_list, 
     for list1 in lessthan_list:
         eq_list.append(list1)
     print(sz)
-    print('less than list[0] is', lessthan_list[0])
-    print('lenght of ith row of less than list is:', len(lessthan_list[0]))
     print(unit_cost)
     unit_cost+=[0]*sz
     print(f'eq_list {eq_list}')
@@ -302,6 +323,9 @@ def transform_to_standard_lp(type, d, lessthan_list, greaterthan_list, eq_list, 
     b=np.array([row[-1] for row in eq_list])
     unit_cost=np.array(unit_cost)
     return A,b,unit_cost,slack_start
+
+
+
 
 
     
