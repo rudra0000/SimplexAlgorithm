@@ -42,21 +42,15 @@ class Tableau:
                 self.Matrix[row] -= self.Matrix[p] * self.Matrix[row][q]
                 self.Matrix[row][abs(self.Matrix[row]) < EPSILON] = 0
 
-    def find_q(self):  # find column in non-basis to swap
-        min_ind = 0
-        min_val = None
-        for i in range(1, self.d + 1):
-            if min_val is None:
-                min_val = self.Matrix[self.c + 1][i]
-                min_ind = i
-            if self.Matrix[self.c + 1][i] < min_val and (
-                self.is_basis.get(i) == None or self.is_basis.get(i) == False
-            ):
-                min_val = self.Matrix[self.c + 1][i]
-                min_ind = i
-        if min_ind == 0 or min_val >= 0:
-            return [False, -1]
-        return [True, min_ind]
+
+
+    #bland's rule added
+    def find_all_qs(self): #returns  list of all cols with negative cost coefficients
+        q_index_list=[]
+        for i in range(1,self.d+1):
+            if self.Matrix[self.c + 1][i]<0:
+                q_index_list.append(i)
+        return q_index_list
 
     def find_p(self, q):  # find column to swap with q
         min_ind = 0
@@ -90,7 +84,7 @@ class Tableau:
         self.original_d=self.d
         self.d=self.c+self.d
         self.c=self.c
-        self.original_matrix=self.artificialMatrix #wastage of space
+        self.original_matrix=self.artificialMatrix
         self.Matrix=self.artificialMatrix
         self.printMat()
 
@@ -113,7 +107,6 @@ class Tableau:
            self.Matrix[-1]-=self.Matrix[key]*last
         self.c=self.original_c
         self.d=self.original_d
-        # self.printMat()
 
 
     def printMat(self, matr=None):
@@ -131,29 +124,37 @@ class Tableau:
         if not self.is_valid:
             return None
         while True:
-            q = self.find_q()
-            if q[0] == False:
+            q_index_list = self.find_all_qs()
+            if len(q_index_list)==0: #optimum
                 print("Optimum")
                 self.printMat()
-                return
-            p = self.find_p(q[1])
-            if p[0] == False:
-                self.printMat()
+                return True
+            pivoted=False
+            for q in q_index_list:
+                #find corresponding p for this q
+                flag,p=self.find_p(q)
+                if flag and not pivoted:
+                    #pivot
+                    self.pivot(p,q)
+                    leaving_column=self.basis_ordering.get(p)
+                    self.is_basis[leaving_column]=False
+                    self.is_basis[q]=True
+                    self.basis_ordering[p]=q
+                    pivoted=True
+                    break
+            #check did we pivot
+            if not pivoted:
                 print("Unbounded")
                 return None
-            self.pivot(p[1], q[1])
-            leaving_column = self.basis_ordering.get(p[1])
-            self.is_basis[leaving_column] = False
-            self.is_basis[q[1]] = True
-            self.basis_ordering[p[1]]=q[1]
-            # self.Matrix = np.round(self.Matrix, 1)
+
+                
+         
     
     def displayans(self, slack_start):
         final_ans = []
         answer = [0]*(self.d+1)
         for key, value in self.basis_ordering.items():
             answer[value] = self.Matrix[key][-1]
-        print('The final answer is:', answer)
         print(f'self.basis rows {self.basis_ordering}')
         print(slack_start)
         for i in range(1, slack_start, 2):
@@ -184,17 +185,7 @@ def remove_redundant_equalities_rref(eq_list):
 
 
 def transform_to_standard_lp(type_of_lp, d, lessthan_list, greaterthan_list, eq_list, unit_cost):  # min ,all vars > 0, slack vars
-    #todo
     #removing redundancies in the equals list
-    # equality_set=set() #not doing as of now 
-    # for eqn in eq_list:
-    #     gcd=0
-    #     for elem in eqn:
-    #         gcd=math.gcd(elem,gcd)
-    #     for elem in eqn:
-    #         elem/=gcd
-    #     print(f'eqn is {eqn}')
-    #     equality_set.add(tuple(eqn))
         
     # eq_list=[[x for x in tup] for tup in equality_set]
     eq_list=remove_redundant_equalities_rref(eq_list)
@@ -250,13 +241,7 @@ def transform_to_standard_lp(type_of_lp, d, lessthan_list, greaterthan_list, eq_
         eq_list[i].append(last_el) 
     #u-v fo requal list
     
-    # print(len(lessthan_list[0]) - len(eq_list[0]), '0s added manually')
-    
-    # if(len(lessthan_list) != 0):
 
-    # print('that loser idff is', len(lessthan_list[0]) - len(eq_list[0]))
-
-    # print(len(lessthan_list[0]))
     for i in range(len(eq_list)):
         if len(lessthan_list) == 0:
             break
@@ -342,11 +327,13 @@ def take_input(reader_obj):
             current_index+=1
         end=current_index
         type_of_lp,number_of_actual_variables, less_than_list, greater_than_list, equal_list, unit_cost=take_input_of_one_test_case(reader_obj[start:end],equal_list,greater_than_list,less_than_list)
+        print(f'Test Case {test_case} #####################################################################################################################################################')
         A,b,unit_cost,slack_start=transform_to_standard_lp(type_of_lp,number_of_actual_variables,less_than_list,greater_than_list,equal_list,unit_cost)
+        
         if type(A)==bool and not A:
             test_case+=1
             continue
-        print(f'Test Case {test_case} #####################################################################################################################################################')
+        
         tableau=Tableau(A=A,b=b,unit_cost=unit_cost)
         test_case+=1
         tableau.solve()
