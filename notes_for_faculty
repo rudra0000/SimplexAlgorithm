@@ -1,0 +1,11 @@
+Consider the case where we have large number of inequalities making c >= d.
+When we add slack variables the number of variables increases to c+d which is clearly larger than d.
+Hence the c<=d condition is never violated and the simplex algorithm executes seemlessly without any issues.
+
+On the other hand if we have large number of equalities making c>d then some of them are redundant. 
+This may lead to two possible scenarios:
+1. No solution exists
+2. Solutions exists and the equations are not linearly independent.
+
+For case 1, the simplex algorithm will terminate with no solution found.
+For case 2, we preprocess the equations and remove redundant ones to again ensure c <= d. Now the simplex algorithm will work.

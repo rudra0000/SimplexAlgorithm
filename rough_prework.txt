@@ -36,7 +36,7 @@ solution:
 1. max to min and the inequalities
     a) max to min: make separate lists for less than and greater than
 2. all >= 0 
--- use aryan's intercept trick to remove redundant eqns
+-- use aryan's intercept trick to remove redundant eqns -- we are not using this anymore
 3. slack
 4. infeasiblility -- the two cases 
     a) c > d
