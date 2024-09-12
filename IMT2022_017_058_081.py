@@ -1,6 +1,9 @@
 import numpy as np
 from collections import defaultdict
 import csv,math
+
+
+status=None
   
 # Open file  
 with open('inp.csv') as file_obj: 
@@ -86,18 +89,20 @@ class Tableau:
         self.c=self.c
         self.original_matrix=self.artificialMatrix
         self.Matrix=self.artificialMatrix
-        self.printMat()
+        # self.printMat()
 
-        self.solve()
+        self.solve(showres = False)
         for key,val in self.basis_ordering.items():
             if (val>self.d):
-                print("Infeasible")
+                print("INFEASIBLE")
+                status = "INFEASIBLE"
                 return False
         self.ready_to_solve()
+        return True
         
 
     def ready_to_solve(self): #retrieve the original matrix from the artificial one
-        print('artificial problem solved--------------------------###################')
+        # print('artificial problem solved--------------------------###################')
         tmp=np.hstack((self.Matrix[0:,:self.original_d+1],self.Matrix[:,self.d+1:self.d+2]))
         self.Matrix=tmp
         self.Matrix[-1,1:-1]=self.unit_cost
@@ -120,14 +125,20 @@ class Tableau:
             print(V)
 
 
-    def solve(self):
+    def solve(self, showres):
+        global status
         if not self.is_valid:
+            print('lol')
             return None
+        # print('ready, showres is =: ', showres)
         while True:
             q_index_list = self.find_all_qs()
+            
             if len(q_index_list)==0: #optimum
-                print("Optimum")
-                self.printMat()
+                if showres:
+                    status = "PASS"
+                else:
+                    pass
                 return True
             pivoted=False
             for q in q_index_list:
@@ -144,23 +155,26 @@ class Tableau:
                     break
             #check did we pivot
             if not pivoted:
-                print("Unbounded")
-                return None
+                status ="UNBOUNDED"
+                return False
+            
 
                 
          
     
-    def displayans(self, slack_start):
-        final_ans = []
+    def displayans(self, slack_start, type_of_lp):
+        final_ans = {}
+        opt_cost = self.Matrix[-1, -1]
+        if type_of_lp == 'MIN':
+            opt_cost *= -1
         answer = [0]*(self.d+1)
         for key, value in self.basis_ordering.items():
             answer[value] = self.Matrix[key][-1]
-        print(f'self.basis rows {self.basis_ordering}')
-        print(slack_start)
+        # print(f'self.basis rows {self.basis_ordering}')
         for i in range(1, slack_start, 2):
-            print(f'variable {(i+1)//2} is ', answer[i]-answer[i+1])
-            final_ans.append(answer[i]-answer[i+1])
-        return final_ans
+            # print(f'variable {(i+1)//2} is ', answer[i]-answer[i+1])
+            final_ans[(i+1)//2] = float(answer[i]-answer[i+1])
+        return final_ans, opt_cost
 
 def remove_redundant_equalities_rref(eq_list):
     if len(eq_list)==0 :
@@ -186,11 +200,12 @@ def remove_redundant_equalities_rref(eq_list):
 
 def transform_to_standard_lp(type_of_lp, d, lessthan_list, greaterthan_list, eq_list, unit_cost):  # min ,all vars > 0, slack vars
     #removing redundancies in the equals list
-        
+    global status
     # eq_list=[[x for x in tup] for tup in equality_set]
     eq_list=remove_redundant_equalities_rref(eq_list)
     if len(eq_list)>d:
-        print("Overconstrained ,infeasible")
+        status ="INFEASIBLE"
+        # print('status set!!!!')
         return False,None,None,None
     #change the objective if needeed based on the type_of_lp
     eq_list  = eq_list[:]
@@ -306,12 +321,7 @@ def take_input_of_one_test_case(test_case,equal_list,greater_than_list,less_than
             less_than_list.append(parsed_row)
         curr_row+=1
     
-    # print(f'type_of_lp {type_of_lp}')
-    # print(f'd {number_of_actual_variables}')
-    # print(f'lessthan_list {less_than_list}')
-    # print(f'greaterthan_list {greater_than_list}')
-    # print(f'eq_list {equal_list}')
-    # print(f'unit_cost {unit_cost}')
+
     return type_of_lp,number_of_actual_variables, less_than_list, greater_than_list, equal_list, unit_cost
 
 def take_input(reader_obj):
@@ -327,22 +337,29 @@ def take_input(reader_obj):
             current_index+=1
         end=current_index
         type_of_lp,number_of_actual_variables, less_than_list, greater_than_list, equal_list, unit_cost=take_input_of_one_test_case(reader_obj[start:end],equal_list,greater_than_list,less_than_list)
-        print(f'Test Case {test_case} #####################################################################################################################################################')
+        # print(f'Test Case {test_case} #####################################################################################################################################################')
         A,b,unit_cost,slack_start=transform_to_standard_lp(type_of_lp,number_of_actual_variables,less_than_list,greater_than_list,equal_list,unit_cost)
         
         if type(A)==bool and not A:
             test_case+=1
+            print(status)
             continue
         
         tableau=Tableau(A=A,b=b,unit_cost=unit_cost)
         test_case+=1
-        tableau.solve()
-        tableau.printMat()
-        tableau.displayans(slack_start)
+        # print('calledd\n')
+        tableau.solve(showres=True)
+        # tableau.printMat()
+        dict1, opt_cost = tableau.displayans(slack_start, type_of_lp)
+        print(status)
+        print(dict1)
+        print(opt_cost)
 
     
 
 
 take_input(reader_obj=reader_obj)
+
+
 
     
